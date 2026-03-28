@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Weather & News Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── Variables ── */
+:root{
+  --bg:        #080c10;
+  --bg2:       #0d1117;
+  --bg3:       #131920;
+  --card:      #111820;
+  --card2:     #16202b;
+  --border:    rgba(255,255,255,0.06);
+  --border2:   rgba(255,255,255,0.12);
+  --accent:    #4fc3f7;
+  --accent2:   #0288d1;
+  --gold:      #f0a500;
+  --green:     #4caf82;
+  --red:       #ef5350;
+  --text:      #e8edf2;
+  --muted:     #6b7f8f;
+  --muted2:    #4a5a68;
+  --radius:    16px;
+  --radius-sm: 10px;
+}
+
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Instrument Sans',sans-serif;
+  font-size:15px;
+  line-height:1.6;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ── Layout ── */
+.shell{
+  max-width:1280px;
+  margin:0 auto;
+  padding:2rem 1.5rem 3rem;
+}
+
+/* ── Top bar ── */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:2rem;
+  padding-bottom:1.25rem;
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Syne',sans-serif;
+  font-size:1.2rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+.logo span{color:var(--muted);}
+
+/* location search */
+.loc-form{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.loc-form input{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  font-family:'Instrument Sans',sans-serif;
+  font-size:14px;
+  padding:8px 14px;
+  width:200px;
+  outline:none;
+  transition:border-color .2s;
+}
+.loc-form input::placeholder{color:var(--muted2);}
+.loc-form input:focus{border-color:var(--accent);}
+.loc-form button{
+  background:var(--accent2);
+  color:#fff;
+  border:none;
+  border-radius:var(--radius-sm);
+  font-family:'Instrument Sans',sans-serif;
+  font-size:13px;
+  font-weight:500;
+  padding:8px 16px;
+  cursor:pointer;
+  transition:background .2s,transform .1s;
+}
+.loc-form button:hover{background:var(--accent);}
+.loc-form button:active{transform:scale(.97);}
+
+/* api note */
+.api-note{
+  font-size:12px;
+  color:var(--muted2);
+  background:rgba(79,195,247,.06);
+  border:1px solid rgba(79,195,247,.15);
+  border-radius:var(--radius-sm);
+  padding:10px 14px;
+  margin-bottom:1.75rem;
+  line-height:1.5;
+}
+.api-note a{color:var(--accent);text-decoration:none;}
+.api-note a:hover{text-decoration:underline;}
+
+/* ── Grid ── */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:1rem;
+}
+
+/* ── Card base ── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem;
+  position:relative;
+  overflow:hidden;
+  animation:fadeUp .5s ease both;
+}
+.card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(79,195,247,.03) 0%,transparent 60%);
+  pointer-events:none;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(16px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.card:nth-child(1){animation-delay:.05s;}
+.card:nth-child(2){animation-delay:.1s;}
+.card:nth-child(3){animation-delay:.15s;}
+.card:nth-child(4){animation-delay:.2s;}
+.card:nth-child(5){animation-delay:.25s;}
+.card:nth-child(6){animation-delay:.3s;}
+
+.card-label{
+  font-family:'Syne',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:1rem;
+}
+
+/* ── Clock card ── */
+.clock-card{grid-column:span 4;}
+.clock-display{
+  font-family:'Syne',sans-serif;
+  font-size:3.5rem;
+  font-weight:800;
+  letter-spacing:-.02em;
+  color:var(--text);
+  line-height:1;
+  margin-bottom:.25rem;
+}
+.clock-date{
+  font-size:14px;
+  color:var(--muted);
+  font-weight:300;
+}
+.clock-city{
+  margin-top:1rem;
+  font-size:13px;
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.clock-city::before{
+  content:'';
+  display:inline-block;
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.4;}
+}
+
+/* ── Current weather card ── */
+.weather-main{grid-column:span 8;}
+.weather-hero{
+  display:flex;
+  align-items:flex-start;
+  gap:1.5rem;
+  margin-bottom:1.5rem;
+}
+.weather-icon-big{
+  font-size:5rem;
+  line-height:1;
+  filter:drop-shadow(0 0 20px rgba(79,195,247,.3));
+}
+.weather-temp-big{
+  font-family:'Syne',sans-serif;
+  font-size:4.5rem;
+  font-weight:800;
+  letter-spacing:-.03em;
+  line-height:1;
+  color:var(--text);
+}
+.weather-temp-big sup{
+  font-size:1.5rem;
+  font-weight:400;
+  color:var(--muted);
+  vertical-align:super;
+}
+.weather-desc{
+  font-size:15px;
+  color:var(--muted);
+  margin-top:.25rem;
+  text-transform:capitalize;
+}
+.weather-location-name{
+  font-family:'Syne',sans-serif;
+  font-size:1.1rem;
+  font-weight:600;
+  margin-top:.5rem;
+}
+.weather-meta{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:.75rem;
+}
+.meta-pill{
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:.75rem;
+  text-align:center;
+}
+.meta-pill .val{
+  font-family:'Syne',sans-serif;
+  font-size:1.1rem;
+  font-weight:700;
+  color:var(--text);
+}
+.meta-pill .lbl{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+/* ── Air quality card ── */
+.aqi-card{grid-column:span 4;}
+.aqi-ring-wrap{
+  display:flex;
+  align-items:center;
+  gap:1.25rem;
+  margin-bottom:1rem;
+}
+.aqi-ring{position:relative;width:80px;height:80px;flex-shrink:0;}
+.aqi-ring svg{transform:rotate(-90deg);}
+.aqi-ring circle{fill:none;stroke-width:7;}
+.ring-track{stroke:var(--card2);}
+.ring-val{
+  stroke-linecap:round;
+  transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);
+}
+.aqi-num{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;
+  font-size:1.3rem;font-weight:800;
+}
+.aqi-info .aqi-status{
+  font-family:'Syne',sans-serif;
+  font-size:1.1rem;font-weight:700;
+  margin-bottom:.25rem;
+}
+.aqi-info .aqi-desc{font-size:13px;color:var(--muted);line-height:1.4;}
+.aqi-details{
+  display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.75rem;
+}
+.aqi-pill{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;padding:.6rem .75rem;
+}
+.aqi-pill .pval{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
+.aqi-pill .plbl{font-size:11px;color:var(--muted);}
+
+/* ── UV card ── */
+.uv-card{grid-column:span 4;}
+.uv-bar-wrap{margin:.75rem 0;}
+.uv-bar-bg{
+  height:8px;border-radius:4px;
+  background:linear-gradient(90deg,#4caf82,#f0a500,#ef5350,#9c27b0);
+  position:relative;
+}
+.uv-marker{
+  position:absolute;top:-4px;
+  width:16px;height:16px;
+  border-radius:50%;
+  background:#fff;
+  border:3px solid var(--bg);
+  box-shadow:0 0 8px rgba(255,255,255,.4);
+  transform:translateX(-50%);
+  transition:left .8s cubic-bezier(.4,0,.2,1);
+}
+.uv-value{
+  font-family:'Syne',sans-serif;
+  font-size:2.5rem;font-weight:800;
+  line-height:1;margin-bottom:.25rem;
+}
+.uv-status{font-size:13px;color:var(--muted);margin-bottom:.75rem;}
+.uv-tip{
+  font-size:12px;color:var(--muted);
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;padding:.6rem .75rem;line-height:1.4;
+}
+
+/* ── Forecast card ── */
+.forecast-card{grid-column:span 4;}
+.forecast-list{display:flex;flex-direction:column;gap:.5rem;}
+.forecast-row{
+  display:flex;align-items:center;
+  gap:.75rem;
+  padding:.6rem .75rem;
+  border-radius:8px;
+  background:var(--card2);
+  border:1px solid var(--border);
+}
+.fc-day{font-size:13px;font-weight:500;width:40px;flex-shrink:0;}
+.fc-icon{font-size:1.3rem;flex-shrink:0;}
+.fc-desc{font-size:12px;color:var(--muted);flex:1;}
+.fc-temps{
+  display:flex;gap:.5rem;align-items:center;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+}
+.fc-lo{color:var(--muted);}
+
+/* ── News card ── */
+.news-card{grid-column:span 8;}
+.news-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1rem;
+}
+.news-src-filter{
+  display:flex;gap:6px;
+}
+.news-filter-btn{
+  font-size:11px;font-weight:500;
+  padding:4px 12px;border-radius:999px;
+  border:1px solid var(--border2);
+  background:transparent;color:var(--muted);
+  cursor:pointer;transition:all .15s;
+  font-family:'Instrument Sans',sans-serif;
+}
+.news-filter-btn.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+.news-filter-btn:hover:not(.active){border-color:var(--accent);color:var(--text);}
+
+.news-list{display:flex;flex-direction:column;gap:.75rem;}
+.news-item{
+  display:flex;gap:1rem;align-items:flex-start;
+  padding:.9rem 1rem;
+  border-radius:var(--radius-sm);
+  background:var(--card2);
+  border:1px solid var(--border);
+  cursor:pointer;
+  transition:border-color .2s,background .2s;
+  text-decoration:none;
+  color:inherit;
+}
+.news-item:hover{border-color:var(--border2);background:var(--bg3);}
+.news-num{
+  font-family:'Syne',sans-serif;
+  font-size:1.5rem;font-weight:800;
+  color:var(--border2);
+  flex-shrink:0;line-height:1;
+  min-width:28px;
+}
+.news-body{flex:1;min-width:0;}
+.news-title{
+  font-size:14px;font-weight:500;
+  color:var(--text);line-height:1.4;
+  margin-bottom:.3rem;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.news-meta{
+  display:flex;gap:.75rem;align-items:center;
+  font-size:12px;color:var(--muted);
+}
+.news-source{
+  font-family:'Syne',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--accent);
+}
+.news-dot{width:3px;height:3px;border-radius:50%;background:var(--muted2);}
+
+/* ── Loading / Error states ── */
+.loading-shimmer{
+  background:linear-gradient(90deg,var(--card2) 25%,var(--card) 50%,var(--card2) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:6px;
+  height:14px;margin-bottom:8px;
+}
+@keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+.error-msg{
+  color:var(--red);font-size:13px;
+  display:flex;align-items:center;gap:6px;
+}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .clock-card,.weather-main{grid-column:span 12;}
+  .aqi-card,.uv-card,.forecast-card{grid-column:span 6;}
+  .news-card{grid-column:span 12;}
+}
+@media(max-width:600px){
+  .aqi-card,.uv-card,.forecast-card,.news-card{grid-column:span 12;}
+  .weather-meta{grid-template-columns:repeat(2,1fr);}
+  .clock-display{font-size:2.5rem;}
+  .weather-temp-big{font-size:3rem;}
+  .topbar{flex-direction:column;align-items:flex-start;gap:1rem;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="logo">Horizon<span>Dashboard</span></div>
+    <form class="loc-form" id="loc-form">
+      <input type="text" id="city-input" placeholder="Enter city (e.g. Mumbai)" autocomplete="off"/>
+      <button type="submit">Search</button>
+    </form>
+  </div>
+
+  <!-- API key note -->
+  <div class="api-note">
+    <strong style="color:var(--accent)">Setup required:</strong>
+    This dashboard uses the <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap API</a> (free) and
+    <a href="https://newsapi.org" target="_blank">NewsAPI</a> (free).
+    Open the <code>&lt;script&gt;</code> section at the bottom of this file and replace
+    <code>YOUR_OWM_KEY</code> and <code>YOUR_NEWS_KEY</code> with your free API keys.
+    NewsAPI requires a server or localhost — use <a href="https://www.gnews.io" target="_blank">GNews</a> as an alternative for static files.
+  </div>
+
+  <!-- Dashboard Grid -->
+  <div class="grid">
+
+    <!-- Clock -->
+    <div class="card clock-card" id="clock-card">
+      <div class="card-label">Local Time</div>
+      <div class="clock-display" id="clock-time">--:--:--</div>
+      <div class="clock-date" id="clock-date">Loading…</div>
+      <div class="clock-city" id="clock-city">Detecting location…</div>
+    </div>
+
+    <!-- Current Weather -->
+    <div class="card weather-main" id="weather-card">
+      <div class="card-label">Current Weather</div>
+      <div id="weather-content">
+        <div class="loading-shimmer" style="width:60%;height:60px;"></div>
+        <div class="loading-shimmer" style="width:40%;"></div>
+        <div class="loading-shimmer" style="width:80%;height:50px;margin-top:1rem;"></div>
+      </div>
+    </div>
+
+    <!-- Air Quality -->
+    <div class="card aqi-card" id="aqi-card">
+      <div class="card-label">Air Quality</div>
+      <div id="aqi-content">
+        <div class="loading-shimmer" style="width:70%;height:80px;"></div>
+      </div>
+    </div>
+
+    <!-- UV Index -->
+    <div class="card uv-card" id="uv-card">
+      <div class="card-label">UV Index</div>
+      <div id="uv-content">
+        <div class="loading-shimmer" style="width:50%;height:60px;"></div>
+      </div>
+    </div>
+
+    <!-- 5-Day Forecast -->
+    <div class="card forecast-card" id="forecast-card">
+      <div class="card-label">5-Day Forecast</div>
+      <div id="forecast-content">
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+      </div>
+    </div>
+
+    <!-- News -->
+    <div class="card news-card" id="news-card">
+      <div class="news-header">
+        <div class="card-label" style="margin-bottom:0">Top Headlines</div>
+        <div class="news-src-filter">
+          <button class="news-filter-btn active" data-cat="general">General</button>
+          <button class="news-filter-btn" data-cat="technology">Tech</button>
+          <button class="news-filter-btn" data-cat="science">Science</button>
+        </div>
+      </div>
+      <div id="news-content">
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</div><!-- /shell -->
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONFIG — replace with your free API keys
+// ═══════════════════════════════════════════════
+const OWM_KEY  = '09b348a42fc967aeb0b213ed1ec814dc';   // https://openweathermap.org/api
+const GNEWS_KEY = '252f77f4f0fa8e11903228329e462d6f';  // https://newsapi.org (or use GNews)
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let currentCity = 'Bangalore';
+let currentLat  = null;
+let currentLon  = null;
+let newsCategory = 'general';
+
+// ═══════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════
+function updateClock(){
+  const now  = new Date();
+  const h    = String(now.getHours()).padStart(2,'0');
+  const m    = String(now.getMinutes()).padStart(2,'0');
+  const s    = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock-time').textContent = `${h}:${m}:${s}`;
+  document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US',{
+    weekday:'long',year:'numeric',month:'long',day:'numeric'
+  });
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ═══════════════════════════════════════════════
+//  WEATHER ICONS
+// ═══════════════════════════════════════════════
+function weatherIcon(code){
+  if(!code) return '🌡️';
+  const c = String(code);
+  if(c.startsWith('2')) return '⛈️';
+  if(c.startsWith('3')) return '🌦️';
+  if(c.startsWith('5')) return '🌧️';
+  if(c.startsWith('6')) return '❄️';
+  if(c.startsWith('7')) return '🌫️';
+  if(c==='800')          return '☀️';
+  if(c==='801')          return '🌤️';
+  if(c==='802')          return '⛅';
+  return '☁️';
+}
+
+function windDir(deg){
+  const dirs=['N','NE','E','SE','S','SW','W','NW'];
+  return dirs[Math.round(deg/45)%8];
+}
+
+// ═══════════════════════════════════════════════
+//  WEATHER
+// ═══════════════════════════════════════════════
+async function fetchWeather(city){
+  if(OWM_KEY==='YOUR_OWM_KEY'){
+    renderWeatherDemo();
+    renderAQIDemo();
+    renderUVDemo();
+    renderForecastDemo();
+    return;
+  }
+  try{
+    const r  = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${OWM_KEY}&units=metric`);
+    if(!r.ok) throw new Error('City not found');
+    const d  = await r.json();
+    currentLat = d.coord.lat;
+    currentLon = d.coord.lon;
+    currentCity = d.name;
+    document.getElementById('clock-city').textContent = `${d.name}, ${d.sys.country}`;
+    renderWeather(d);
+    fetchAQI(currentLat,currentLon);
+    fetchForecast(city);
+  } catch(e){
+    document.getElementById('weather-content').innerHTML=
+      `<div class="error-msg">⚠️ ${e.message}. Check city name or API key.</div>`;
+  }
+}
+
+function renderWeather(d){
+  const icon = weatherIcon(d.weather[0].id);
+  document.getElementById('weather-content').innerHTML=`
+    <div class="weather-hero">
+      <div class="weather-icon-big">${icon}</div>
+      <div>
+        <div class="weather-temp-big">${Math.round(d.main.temp)}<sup>°C</sup></div>
+        <div class="weather-desc">${d.weather[0].description}</div>
+        <div class="weather-location-name">${d.name}, ${d.sys.country}</div>
+      </div>
+    </div>
+    <div class="weather-meta">
+      <div class="meta-pill"><div class="val">${Math.round(d.main.feels_like)}°</div><div class="lbl">Feels like</div></div>
+      <div class="meta-pill"><div class="val">${d.main.humidity}%</div><div class="lbl">Humidity</div></div>
+      <div class="meta-pill"><div class="val">${Math.round(d.wind.speed*3.6)} km/h</div><div class="lbl">Wind ${windDir(d.wind.deg)}</div></div>
+      <div class="meta-pill"><div class="val">${d.main.pressure} hPa</div><div class="lbl">Pressure</div></div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+//  AIR QUALITY
+// ═══════════════════════════════════════════════
+async function fetchAQI(lat,lon){
+  try{
+    const r = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OWM_KEY}`);
+    const d = await r.json();
+    renderAQI(d.list[0]);
+  } catch(e){ renderAQIDemo(); }
+}
+
+const AQI_INFO=[
+  {label:'Good',        color:'#4caf82', desc:'Air quality is satisfactory.'},
+  {label:'Fair',        color:'#8bc34a', desc:'Acceptable air quality.'},
+  {label:'Moderate',    color:'#f0a500', desc:'Sensitive groups may be affected.'},
+  {label:'Poor',        color:'#ef5350', desc:'Everyone may experience effects.'},
+  {label:'Very Poor',   color:'#9c27b0', desc:'Health alert for everyone.'},
+];
+
+function renderAQI(data){
+  const idx   = (data.main.aqi||1)-1;
+  const info  = AQI_INFO[idx];
+  const pct   = ((idx+1)/5)*100;
+  const circ  = 2*Math.PI*35;
+  const offset= circ-(pct/100)*circ;
+  const c     = data.components;
+  document.getElementById('aqi-content').innerHTML=`
+    <div class="aqi-ring-wrap">
+      <div class="aqi-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle class="ring-track" cx="40" cy="40" r="35"/>
+          <circle class="ring-val" cx="40" cy="40" r="35"
+            stroke="${info.color}"
+            stroke-dasharray="${circ.toFixed(1)}"
+            stroke-dashoffset="${offset.toFixed(1)}"/>
+        </svg>
+        <div class="aqi-num" style="color:${info.color}">${idx+1}</div>
+      </div>
+      <div class="aqi-info">
+        <div class="aqi-status" style="color:${info.color}">${info.label}</div>
+        <div class="aqi-desc">${info.desc}</div>
+      </div>
+    </div>
+    <div class="aqi-details">
+      <div class="aqi-pill"><div class="pval">${c.pm2_5?.toFixed(1)||'—'}</div><div class="plbl">PM2.5 μg/m³</div></div>
+      <div class="aqi-pill"><div class="pval">${c.pm10?.toFixed(1)||'—'}</div><div class="plbl">PM10 μg/m³</div></div>
+      <div class="aqi-pill"><div class="pval">${c.no2?.toFixed(1)||'—'}</div><div class="plbl">NO₂ μg/m³</div></div>
+      <div class="aqi-pill"><div class="pval">${c.o3?.toFixed(1)||'—'}</div><div class="plbl">O₃ μg/m³</div></div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+//  UV INDEX (derived from forecast)
+// ═══════════════════════════════════════════════
+function renderUV(uv){
+  const info = uv<3?{label:'Low',color:'#4caf82',tip:'No protection needed.'}:
+               uv<6?{label:'Moderate',color:'#f0a500',tip:'Wear sunscreen SPF 30+.'}:
+               uv<8?{label:'High',color:'#ff7043',tip:'Seek shade midday.'}:
+               uv<11?{label:'Very High',color:'#ef5350',tip:'Extra protection essential.'}:
+                     {label:'Extreme',color:'#9c27b0',tip:'Stay indoors if possible.'};
+  const pct = Math.min(uv/12,1)*100;
+  document.getElementById('uv-content').innerHTML=`
+    <div class="uv-value" style="color:${info.color}">${uv.toFixed(1)}</div>
+    <div class="uv-status" style="color:${info.color}">${info.label}</div>
+    <div class="uv-bar-wrap">
+      <div class="uv-bar-bg">
+        <div class="uv-marker" style="left:${pct}%"></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted2);margin-top:4px;margin-bottom:.75rem;">
+      <span>0</span><span>3</span><span>6</span><span>9</span><span>12+</span>
+    </div>
+    <div class="uv-tip">💡 ${info.tip}</div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+//  FORECAST
+// ═══════════════════════════════════════════════
+async function fetchForecast(city){
+  try{
+    const r = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${OWM_KEY}&units=metric`);
+    const d = await r.json();
+
+    // UV from first noon entry
+    const noonEntry = d.list.find(e=>{
+      const h = new Date(e.dt*1000).getHours();
+      return h>=11&&h<=13;
+    });
+    if(noonEntry) renderUV(noonEntry.uvi||3);
+    else renderUVDemo();
+
+    // Group by day
+    const days={};
+    d.list.forEach(e=>{
+      const day = new Date(e.dt*1000).toLocaleDateString('en-US',{weekday:'short'});
+      if(!days[day]) days[day]={min:e.main.temp_min,max:e.main.temp_max,codes:[],desc:e.weather[0].description};
+      days[day].min = Math.min(days[day].min,e.main.temp_min);
+      days[day].max = Math.max(days[day].max,e.main.temp_max);
+      days[day].codes.push(e.weather[0].id);
+    });
+
+    const entries = Object.entries(days).slice(1,6);
+    document.getElementById('forecast-content').innerHTML=`
+      <div class="forecast-list">
+        ${entries.map(([day,v])=>`
+          <div class="forecast-row">
+            <div class="fc-day">${day}</div>
+            <div class="fc-icon">${weatherIcon(v.codes[Math.floor(v.codes.length/2)])}</div>
+            <div class="fc-desc">${v.desc}</div>
+            <div class="fc-temps">
+              <span>${Math.round(v.max)}°</span>
+              <span class="fc-lo">${Math.round(v.min)}°</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch(e){ renderForecastDemo(); }
+}
+
+// ═══════════════════════════════════════════════
+//  NEWS
+// ═══════════════════════════════════════════════
+async function fetchNews(category='general'){
+  if(GNEWS_KEY==='252f77f4f0fa8e11903228329e462d6f'){ 
+    renderNewsDemo(category); 
+    return; 
+  }
+
+  try{
+    const r = await fetch(
+      `https://gnews.io/api/v4/top-headlines?category=${category}&lang=en&max=6&apikey=${NEWS_KEY}`
+    );
+
+    const d = await r.json();
+
+    if(!d.articles) throw new Error('No news data');
+
+    renderNews(d.articles);
+
+  } catch(e){
+    document.getElementById('news-content').innerHTML =
+      `<div class="error-msg">⚠️ Failed to load news. Check your GNews API key.</div>`;
+  }
+}
+
+function renderNews(articles){
+  document.getElementById('news-content').innerHTML=`
+    <div class="news-list">
+      ${articles.slice(0,6).map((a,i)=>`
+        <a class="news-item" href="${a.url}" target="_blank" rel="noopener">
+          <div class="news-num">0${i+1}</div>
+          <div class="news-body">
+            <div class="news-title">${escHtml(a.title||'')}</div>
+            <div class="news-meta">
+              <span class="news-source">${escHtml(a.source?.name||'GNews')}</span>
+              <span class="news-dot"></span>
+              <span>${timeAgo(a.publishedAt)}</span>
+            </div>
+          </div>
+        </a>
+      `).join('')}
+
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+//  DEMO DATA (shown when no API key)
+// ═══════════════════════════════════════════════
+function renderWeatherDemo(){
+  document.getElementById('clock-city').textContent = 'Bangalore, IN';
+  document.getElementById('weather-content').innerHTML=`
+    <div style="font-size:12px;color:var(--gold);margin-bottom:.75rem;">⚡ Demo mode — add your OpenWeatherMap API key</div>
+    <div class="weather-hero">
+      <div class="weather-icon-big">⛅</div>
+      <div>
+        <div class="weather-temp-big">18<sup>°C</sup></div>
+        <div class="weather-desc">partly cloudy</div>
+        <div class="weather-location-name">Bangalore, IN</div>
+      </div>
+    </div>
+    <div class="weather-meta">
+      <div class="meta-pill"><div class="val">16°</div><div class="lbl">Feels like</div></div>
+      <div class="meta-pill"><div class="val">72%</div><div class="lbl">Humidity</div></div>
+      <div class="meta-pill"><div class="val">14 km/h</div><div class="lbl">Wind SW</div></div>
+      <div class="meta-pill"><div class="val">1013 hPa</div><div class="lbl">Pressure</div></div>
+    </div>
+  `;
+}
+
+function renderAQIDemo(){
+  const circ=2*Math.PI*35; const offset=circ-(2/5)*circ;
+  document.getElementById('aqi-content').innerHTML=`
+    <div style="font-size:12px;color:var(--gold);margin-bottom:.75rem;">⚡ Demo mode</div>
+    <div class="aqi-ring-wrap">
+      <div class="aqi-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle class="ring-track" cx="40" cy="40" r="35"/>
+          <circle class="ring-val" cx="40" cy="40" r="35" stroke="#8bc34a"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"/>
+        </svg>
+        <div class="aqi-num" style="color:#8bc34a">2</div>
+      </div>
+      <div class="aqi-info">
+        <div class="aqi-status" style="color:#8bc34a">Fair</div>
+        <div class="aqi-desc">Acceptable air quality.</div>
+      </div>
+    </div>
+    <div class="aqi-details">
+      <div class="aqi-pill"><div class="pval">12.4</div><div class="plbl">PM2.5 μg/m³</div></div>
+      <div class="aqi-pill"><div class="pval">21.0</div><div class="plbl">PM10 μg/m³</div></div>
+      <div class="aqi-pill"><div class="pval">18.3</div><div class="plbl">NO₂ μg/m³</div></div>
+      <div class="aqi-pill"><div class="pval">67.2</div><div class="plbl">O₃ μg/m³</div></div>
+    </div>
+  `;
+}
+
+function renderUVDemo(){
+  document.getElementById('uv-content').innerHTML=`
+    <div style="font-size:12px;color:var(--gold);margin-bottom:.75rem;">⚡ Demo mode</div>
+    <div class="uv-value" style="color:#f0a500">4.2</div>
+    <div class="uv-status" style="color:#f0a500">Moderate</div>
+    <div class="uv-bar-wrap">
+      <div class="uv-bar-bg"><div class="uv-marker" style="left:35%"></div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted2);margin-top:4px;margin-bottom:.75rem;">
+      <span>0</span><span>3</span><span>6</span><span>9</span><span>12+</span>
+    </div>
+    <div class="uv-tip">💡 Wear sunscreen SPF 30+.</div>
+  `;
+}
+
+function renderForecastDemo(){
+  const days=[
+    {d:'Mon',i:'🌤️',desc:'partly cloudy',hi:19,lo:12},
+    {d:'Tue',i:'🌧️',desc:'light rain',hi:15,lo:10},
+    {d:'Wed',i:'⛅',desc:'overcast',hi:17,lo:11},
+    {d:'Thu',i:'☀️',desc:'sunny',hi:22,lo:13},
+    {d:'Fri',i:'🌦️',desc:'showers',hi:16,lo:10},
+  ];
+  document.getElementById('forecast-content').innerHTML=`
+    <div style="font-size:12px;color:var(--gold);margin-bottom:.75rem;">⚡ Demo mode</div>
+    <div class="forecast-list">
+      ${days.map(d=>`
+        <div class="forecast-row">
+          <div class="fc-day">${d.d}</div>
+          <div class="fc-icon">${d.i}</div>
+          <div class="fc-desc">${d.desc}</div>
+          <div class="fc-temps"><span>${d.hi}°</span><span class="fc-lo">${d.lo}°</span></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderNewsDemo(category){
+  const headlines={
+    general:[
+      {t:'Global leaders gather for climate summit amid rising temperatures',s:'BBC News',age:'2h'},
+      {t:'Scientists discover new deep-sea species off the coast of New Zealand',s:'Reuters',age:'3h'},
+      {t:'Major tech company announces record quarterly earnings',s:'Financial Times',age:'4h'},
+      {t:'New infrastructure bill passes with bipartisan support',s:'AP News',age:'5h'},
+      {t:'International space station celebrates 25 years of continuous habitation',s:'NASA',age:'6h'},
+      {t:'Archaeologists uncover ancient city beneath desert sands',s:'National Geographic',age:'8h'},
+    ],
+    technology:[
+      {t:'AI model achieves new benchmark in complex reasoning tasks',s:'The Verge',age:'1h'},
+      {t:'Open-source chip architecture gains major industry backing',s:'Wired',age:'2h'},
+      {t:'Quantum computing startup raises $400M Series C round',s:'TechCrunch',age:'3h'},
+      {t:'New battery chemistry promises double the range for EVs',s:'Ars Technica',age:'4h'},
+      {t:'Major OS update rolls out with new privacy features',s:'9to5Mac',age:'5h'},
+      {t:'Cybersecurity researchers expose critical vulnerability in widely-used library',s:'ZDNet',age:'6h'},
+    ],
+    science:[
+      {t:'JWST captures stunning image of galaxy collision 4 billion light-years away',s:'NASA',age:'1h'},
+      {t:'Researchers develop biodegradable plastic from seaweed extract',s:'Nature',age:'2h'},
+      {t:'New study links gut microbiome diversity to improved mental health',s:'Science',age:'3h'},
+      {t:'Gene therapy trial shows promise for rare inherited blindness',s:'The Lancet',age:'4h'},
+      {t:'Ancient DNA reveals migration patterns of early modern humans',s:'Cell',age:'5h'},
+      {t:'New exoplanet discovered in habitable zone of nearby star',s:'ESO',age:'7h'},
+    ],
+  };
+  const items = headlines[category]||headlines.general;
+  document.getElementById('news-content').innerHTML=`
+    <div style="font-size:12px;color:var(--gold);margin-bottom:.75rem;">⚡ Demo mode — add your NewsAPI key for live headlines</div>
+    <div class="news-list">
+      ${items.map((a,i)=>`
+        <div class="news-item" style="cursor:default;">
+          <div class="news-num">0${i+1}</div>
+          <div class="news-body">
+            <div class="news-title">${a.t}</div>
+            <div class="news-meta">
+              <span class="news-source">${a.s}</span>
+              <span class="news-dot"></span>
+              <span>${a.age} ago</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════
+function escHtml(s){
+  return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function timeAgo(iso){
+  if(!iso) return '';
+  const diff = (Date.now()-new Date(iso).getTime())/60000;
+  if(diff<60)  return `${Math.round(diff)}m ago`;
+  if(diff<1440) return `${Math.round(diff/60)}h ago`;
+  return `${Math.round(diff/1440)}d ago`;
+}
+
+// ═══════════════════════════════════════════════
+//  EVENTS
+// ═══════════════════════════════════════════════
+document.getElementById('loc-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const val = document.getElementById('city-input').value.trim();
+  if(val){ currentCity=val; fetchWeather(val); fetchNews(newsCategory); }
+});
+
+document.querySelectorAll('.news-filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.news-filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    newsCategory = btn.dataset.cat;
+    fetchNews(newsCategory);
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  FETCH WEATHER BY COORDS (used by geolocation)
+// ═══════════════════════════════════════════════
+async function fetchWeatherByCoords(lat,lon){
+  if(OWM_KEY==='YOUR_OWM_KEY'){
+    renderWeatherDemo(); renderAQIDemo(); renderUVDemo(); renderForecastDemo();
+    return;
+  }
+  try{
+    const r = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric`);
+    if(!r.ok) throw new Error('Weather fetch failed');
+    const d = await r.json();
+    currentLat  = lat;
+    currentLon  = lon;
+    currentCity = d.name;
+    document.getElementById('city-input').value = d.name;
+    document.getElementById('clock-city').textContent = `${d.name}, ${d.sys.country}`;
+    renderWeather(d);
+    fetchAQI(lat,lon);
+    fetchForecastByCoords(lat,lon);
+  } catch(e){
+    document.getElementById('weather-content').innerHTML=
+      `<div class="error-msg">⚠️ ${e.message}. Check API key.</div>`;
+  }
+}
+
+async function fetchForecastByCoords(lat,lon){
+  try{
+    const r = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric`);
+    const d = await r.json();
+    const noonEntry = d.list.find(e=>{ const h=new Date(e.dt*1000).getHours(); return h>=11&&h<=13; });
+    if(noonEntry) renderUV(noonEntry.uvi||3); else renderUVDemo();
+    const days={};
+    d.list.forEach(e=>{
+      const day=new Date(e.dt*1000).toLocaleDateString('en-US',{weekday:'short'});
+      if(!days[day]) days[day]={min:e.main.temp_min,max:e.main.temp_max,codes:[],desc:e.weather[0].description};
+      days[day].min=Math.min(days[day].min,e.main.temp_min);
+      days[day].max=Math.max(days[day].max,e.main.temp_max);
+      days[day].codes.push(e.weather[0].id);
+    });
+    const entries=Object.entries(days).slice(1,6);
+    document.getElementById('forecast-content').innerHTML=`
+      <div class="forecast-list">
+        ${entries.map(([day,v])=>`
+          <div class="forecast-row">
+            <div class="fc-day">${day}</div>
+            <div class="fc-icon">${weatherIcon(v.codes[Math.floor(v.codes.length/2)])}</div>
+            <div class="fc-desc">${v.desc}</div>
+            <div class="fc-temps"><span>${Math.round(v.max)}°</span><span class="fc-lo">${Math.round(v.min)}°</span></div>
+          </div>`).join('')}
+      </div>`;
+  } catch(e){ renderForecastDemo(); }
+}
+
+// ═══════════════════════════════════════════════
+//  INIT — try GPS first, fall back to city
+// ═══════════════════════════════════════════════
+function init(){
+  // Clock always uses device local time automatically
+  updateClock();
+
+  if(navigator.geolocation){
+    document.getElementById('clock-city').textContent = 'Detecting your location…';
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        // Success — use real GPS coords
+        fetchWeatherByCoords(pos.coords.latitude, pos.coords.longitude);
+        fetchNews(newsCategory);
+      },
+      () => {
+        // Denied or failed — fall back to default city
+        document.getElementById('clock-city').textContent = currentCity;
+        fetchWeather(currentCity);
+        fetchNews(newsCategory);
+      },
+      { timeout: 8000 }
+    );
+  } else {
+    // Browser doesn't support geolocation
+    fetchWeather(currentCity);
+    fetchNews(newsCategory);
+  }
+}
+
+init();
+
+// Auto-refresh every 10 minutes
+setInterval(()=>{
+  if(currentLat && currentLon) fetchWeatherByCoords(currentLat, currentLon);
+  else fetchWeather(currentCity);
+  fetchNews(newsCategory);
+}, 600000);
+</script>
+
+</body>
+</html>

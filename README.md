@@ -10,8 +10,7 @@ A sleek, modern **Weather & News Dashboard** that delivers real-time weather ins
 ---
 
 ## 🔗 Live Demo
-👉 Add your deployed link here  
-Example: https://your-project.netlify.app
+https://weather-news-dashboard-9sbp.vercel.app/
 
 ---
 

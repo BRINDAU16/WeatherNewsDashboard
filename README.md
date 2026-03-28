@@ -1,186 +1,69 @@
-# WeatherNewsDashboard
-# 🌤️ Horizon Dashboard
+# Horizon Dashboard
 
-A dark, sleek Weather & News dashboard built with pure HTML, CSS, and JavaScript. No frameworks, no dependencies — just one file that works in any browser.
-
-![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
-![CSS](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
-![License](https://img.shields.io/badge/license-MIT-green?style=flat)
+A self-contained weather and news dashboard built with vanilla HTML, CSS, and JavaScript. No build tools, no frameworks — just open the file.
 
 ---
 
-## 🖥️ Live Demo
+## What it shows
 
-> Hosted on GitHub Pages — [your-username.github.io/horizon-dashboard](https://your-username.github.io/horizon-dashboard)
-
----
-
-## ✨ Features
-
-- **📍 Auto location detection** — uses the browser's built-in GPS to detect your location on load
-- **🌡️ Current weather** — temperature, feels like, humidity, wind speed & pressure
-- **📅 5-day forecast** — daily high/low with weather icons
-- **💨 Air quality index** — animated ring with PM2.5, PM10, NO₂ and O₃ readings
-- **☀️ UV index** — colour-coded bar with sun protection advice
-- **🕐 Live clock** — real-time clock and date in your local timezone
-- **📰 Top news headlines** — filterable by General, Technology, and Science
-- **🔍 City search** — manually search any city worldwide
-- **🔄 Auto-refresh** — data refreshes every 10 minutes automatically
-- **📱 Fully responsive** — works on desktop, tablet, and mobile
+- **Live clock** — local time and date, auto-updating every second
+- **Current weather** — temperature, description, feels like, humidity, wind, pressure
+- **Air quality** — AQI index (1–5) with PM2.5, PM10, NO₂, O₃ readings
+- **UV index** — value, severity label, and sun protection tip
+- **5-day forecast** — daily high/low with weather icons
+- **Top headlines** — filterable by General, Tech, or Science
 
 ---
 
-## 🚀 Getting Started
+## Quick start
 
-### 1. Clone the repository
+1. Get two free API keys (takes ~2 minutes):
+   - **OpenWeatherMap**: https://openweathermap.org/api → sign up → *API keys* tab
+   - **GNews**: https://gnews.io → sign up → copy your key from the dashboard
 
-```bash
-git clone https://github.com/your-username/horizon-dashboard.git
-cd horizon-dashboard
+2. Open `index.html` in a text editor and find this block near the bottom:
+
+```js
+const OWM_KEY   = 'YOUR_OWM_KEY';
+const GNEWS_KEY = 'YOUR_NEWS_KEY';
 ```
 
-### 2. Get your free API keys
+3. Replace both placeholder strings with your actual keys:
 
-| API | Purpose | Free tier |
-|-----|---------|-----------|
-| [OpenWeatherMap](https://openweathermap.org/api) | Weather, AQI, forecast | 1,000 calls/day |
-| [NewsAPI](https://newsapi.org) | News headlines | 100 requests/day |
-
-Sign up on each site and copy your API key from the dashboard.
-
-### 3. Add your keys to the file
-
-Open `dashboard.html` and find these two lines near the top of the `<script>` section:
-
-```javascript
-const OWM_KEY  = 'YOUR_OWM_KEY';
-const NEWS_KEY = 'YOUR_NEWS_KEY';
+```js
+const OWM_KEY   = 'abc123...';   // your OpenWeatherMap key
+const GNEWS_KEY = 'xyz789...';   // your GNews key
 ```
 
-Replace the placeholders with your actual keys.
-
-### 4. Run locally
-
-NewsAPI's free tier requires a server (not a plain file). Start a local server with Python:
-
-```bash
-# Python 3
-python -m http.server 8080
-```
-
-Then open [http://localhost:8080/dashboard.html](http://localhost:8080/dashboard.html) in your browser.
+4. Save the file, then open it in any modern browser — no server needed.
 
 ---
 
-## 🌍 Location Detection
+## Without API keys (demo mode)
 
-When the page loads, the browser will ask:
-
-> *"Allow this page to know your location?"*
-
-- **Allow** → weather and AQI load for your exact GPS coordinates automatically
-- **Block** → falls back to London by default; you can still search any city manually
-
-> **Note:** Geolocation only works over `https://` or `localhost`. It works perfectly on GitHub Pages.
+If you skip step 2–3, the dashboard still works. It shows static sample data for London so you can preview the layout. A yellow "⚡ Demo mode" label appears in each panel.
 
 ---
 
-## 📁 Project Structure
+## Changing the default city
 
+The dashboard tries to use your browser's GPS on load. If you deny that permission, it falls back to **London**.
+
+To change the fallback city, find this line near the top of the `<script>` block:
+
+```js
+let currentCity = 'Bangalore';
 ```
-horizon-dashboard/
-├── dashboard.html    # The entire app — HTML, CSS, and JS in one file
-└── README.md         # You're reading this!
-```
+
+Change `'Bangalore'` to any city name supported by OpenWeatherMap (e.g. `'Mumbai'`, `'New York'`, `'Tokyo'`).
+
+You can also search any city at runtime using the input in the top-right corner.
 
 ---
 
-## 🧠 How It Works
+## File structure
 
-### Geolocation
-```javascript
-navigator.geolocation.getCurrentPosition(
-  pos => fetchWeatherByCoords(pos.coords.latitude, pos.coords.longitude),
-  ()  => fetchWeather('London') // fallback if denied
-);
 ```
-
-### Weather API call
-```javascript
-fetch(`https://api.openweathermap.org/data/2.5/weather
-       ?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric`)
+index.html   ← the entire app — HTML, CSS, and JS in one file
+README.md    ← this file
 ```
-
-### Live clock
-```javascript
-// new Date() always reads the device's local timezone automatically
-const now = new Date();
-document.getElementById('clock-time').textContent =
-  `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-```
-
-### Auto-refresh
-```javascript
-// Refreshes all data every 10 minutes
-setInterval(() => {
-  fetchWeatherByCoords(lat, lon);
-  fetchNews(category);
-}, 600000);
-```
-
----
-
-## 🎨 Customisation
-
-All colours are CSS variables at the top of the `<style>` block:
-
-```css
-:root {
-  --bg:      #080c10;   /* page background  */
-  --accent:  #4fc3f7;   /* highlight colour */
-  --card:    #111820;   /* card background  */
-  --text:    #e8edf2;   /* main text        */
-}
-```
-
-Change `--accent` to any colour to instantly retheme the whole dashboard.
-
----
-
-## 💡 Ideas to Extend
-
-- [ ] Add an hourly forecast chart using Chart.js
-- [ ] Add a dark/light mode toggle
-- [ ] Show a map of the detected location using Leaflet.js
-- [ ] Add severe weather alerts
-- [ ] Save preferred city to `localStorage`
-- [ ] Add more news categories (sports, health, business)
-
----
-
-## 📚 What I Learned
-
-This project covers key intermediate web development concepts:
-
-- Calling **REST APIs** with `fetch()` and handling JSON responses
-- Using the **Geolocation API** to get the user's GPS coordinates
-- **Async/await** and error handling with `try/catch`
-- Dynamic **DOM manipulation** — building UI from live data
-- **CSS Grid** for a responsive multi-column dashboard layout
-- CSS variables, animations, and a cohesive dark theme
-- Auto-refresh patterns with `setInterval`
-
----
-
-## 🔑 API Reference
-
-| Endpoint | Used for |
-|----------|---------|
-| `api.openweathermap.org/data/2.5/weather` | Current weather by city or coords |
-| `api.openweathermap.org/data/2.5/forecast` | 5-day forecast + UV index |
-| `api.openweathermap.org/data/2.5/air_pollution` | Air quality index |
-| `newsapi.org/v2/top-headlines` | News headlines by category |
-
----
-

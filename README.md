@@ -1,69 +1,72 @@
-# Horizon Dashboard
+# 🌤️ Horizon Dashboard
 
-A self-contained weather and news dashboard built with vanilla HTML, CSS, and JavaScript. No build tools, no frameworks — just open the file.
+![Status](https://img.shields.io/badge/status-active-success)
+![Tech](https://img.shields.io/badge/tech-HTML%20%7C%20CSS%20%7C%20JS-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![API](https://img.shields.io/badge/APIs-OpenWeather%20%7C%20GNews-orange)
 
----
-
-## What it shows
-
-- **Live clock** — local time and date, auto-updating every second
-- **Current weather** — temperature, description, feels like, humidity, wind, pressure
-- **Air quality** — AQI index (1–5) with PM2.5, PM10, NO₂, O₃ readings
-- **UV index** — value, severity label, and sun protection tip
-- **5-day forecast** — daily high/low with weather icons
-- **Top headlines** — filterable by General, Tech, or Science
+A sleek, modern **Weather & News Dashboard** that delivers real-time weather insights and top headlines in one clean interface.
 
 ---
 
-## Quick start
-
-1. Get two free API keys (takes ~2 minutes):
-   - **OpenWeatherMap**: https://openweathermap.org/api → sign up → *API keys* tab
-   - **GNews**: https://gnews.io → sign up → copy your key from the dashboard
-
-2. Open `index.html` in a text editor and find this block near the bottom:
-
-```js
-const OWM_KEY   = 'YOUR_OWM_KEY';
-const GNEWS_KEY = 'YOUR_NEWS_KEY';
-```
-
-3. Replace both placeholder strings with your actual keys:
-
-```js
-const OWM_KEY   = 'abc123...';   // your OpenWeatherMap key
-const GNEWS_KEY = 'xyz789...';   // your GNews key
-```
-
-4. Save the file, then open it in any modern browser — no server needed.
+## 🔗 Live Demo
+👉 Add your deployed link here  
+Example: https://your-project.netlify.app
 
 ---
 
-## Without API keys (demo mode)
+## 📸 Preview
 
-If you skip step 2–3, the dashboard still works. It shows static sample data for London so you can preview the layout. A yellow "⚡ Demo mode" label appears in each panel.
+> Add screenshots inside a `/screenshots` folder
 
----
-
-## Changing the default city
-
-The dashboard tries to use your browser's GPS on load. If you deny that permission, it falls back to **London**.
-
-To change the fallback city, find this line near the top of the `<script>` block:
-
-```js
-let currentCity = 'Bangalore';
-```
-
-Change `'Bangalore'` to any city name supported by OpenWeatherMap (e.g. `'Mumbai'`, `'New York'`, `'Tokyo'`).
-
-You can also search any city at runtime using the input in the top-right corner.
+![Dashboard Preview](screenshots/dashboard.png)
 
 ---
 
-## File structure
+## ✨ Features
 
-```
-index.html   ← the entire app — HTML, CSS, and JS in one file
-README.md    ← this file
-```
+- 🌍 Auto location detection (GPS)
+- 🔎 Search weather by city
+- 🌤️ Real-time weather data
+- 🌫️ Air Quality Index (AQI)
+- ☀️ UV Index with health tips
+- 📅 5-day forecast
+- 📰 Live news headlines (category filters)
+- ⏰ Live clock & date
+- 📱 Fully responsive design
+- ⚡ Auto refresh every 10 minutes
+
+---
+
+## 🧠 How It Works
+
+- Uses OpenWeatherMap API for:
+  - Weather
+  - Forecast
+  - Air quality
+
+- Uses GNews API for:
+  - Headlines
+  - Category filtering
+
+- Uses browser Geolocation API for location detection
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer     | Technology |
+|----------|-----------|
+| Frontend | HTML5, CSS3 |
+| Logic    | JavaScript (ES6) |
+| Styling  | Custom CSS |
+| APIs     | OpenWeatherMap, GNews |
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/your-username/horizon-dashboard.git
+cd horizon-dashboard

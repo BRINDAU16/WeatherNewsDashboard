@@ -14,14 +14,6 @@ https://weather-news-dashboard-9sbp.vercel.app/
 
 ---
 
-## 📸 Preview
-
-> Add screenshots inside a `/screenshots` folder
-
-![Dashboard Preview](screenshots/dashboard.png)
-
----
-
 ## ✨ Features
 
 - 🌍 Auto location detection (GPS)
@@ -67,5 +59,5 @@ https://weather-news-dashboard-9sbp.vercel.app/
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/your-username/horizon-dashboard.git
+git clone [https://github.com/your-username/horizon-dashboard.git](https://github.com/BRINDAU16/WeatherNewsDashboard.git)
 cd horizon-dashboard
